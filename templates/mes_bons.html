@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Mes bons{% endblock %}{% block heading %}Mes bons de ravitaillement{% endblock %}
+{% block content %}
+<section class="card">
+  <div class="card-h"><h2>Reçu à déposer ({{ a_deposer|length }})</h2></div>
+  {% for b in a_deposer %}
+  <div class="item"><div><b>Bon n° {{ b.numero }} · {{ b.bus.plaque }}</b><small>{{ b.date_bon|date:"d/m/Y" }} · {{ b.type_carburant }} · {{ b.litres_autorises }} L</small></div>
+    <a class="btn sm" href="{% url 'mon_bon' b.pk %}"><i class="ti ti-camera"></i>Déposer le reçu</a></div>
+  {% empty %}<p class="empty">Aucun reçu à déposer.</p>{% endfor %}
+</section>
+<section class="card">
+  <div class="card-h"><h2>Historique</h2></div>
+  {% for b in autres %}
+  <a class="item link" href="{% url 'mon_bon' b.pk %}"><div><b>Bon n° {{ b.numero }} · {{ b.bus.plaque }}</b><small>{{ b.date_bon|date:"d/m/Y" }} · {{ b.litres_autorises }} L</small></div>
+    {% include "partials/badge.html" with v=b.statut l=b.get_statut_display %}</a>
+  {% empty %}<p class="empty">Aucun bon pour l'instant.</p>{% endfor %}
+</section>
+{% endblock %}

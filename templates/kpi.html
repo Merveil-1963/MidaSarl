@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}KPI{% endblock %}{% block heading %}Indicateurs de performance{% endblock %}
+{% block content %}
+<div class="toolbar"><div class="row-inline"><a class="btn ghost sm" href="?mois={{ prec }}"><i class="ti ti-chevron-left"></i></a><h2 class="cap">{{ titre|date:"F Y" }}</h2><a class="btn ghost sm" href="?mois={{ suiv }}"><i class="ti ti-chevron-right"></i></a></div></div>
+<div class="stats kpi">
+  <div class="stat"><i class="ti ti-droplet green"></i><div><b>{{ litres_mois }} L</b><span>Carburant du mois{% if variation is not None %} · <em>{% if variation > 0 %}+{% endif %}{{ variation }} %</em> vs mois précédent{% endif %}</span></div></div>
+  <div class="stat"><i class="ti ti-receipt blue"></i><div><b>{{ n_bons }}</b><span>Ravitaillements du mois</span></div></div>
+  <div class="stat"><i class="ti ti-target-arrow green"></i><div><b>{% if taux_real is None %}-{% else %}{{ taux_real }} %{% endif %}</b><span>Taux de réalisation ({{ realises }} sur {{ prevus }} prévus)</span></div></div>
+  <div class="stat"><i class="ti ti-shield-check blue"></i><div><b>{% if taux_quota is None %}-{% else %}{{ taux_quota }} %{% endif %}</b><span>Bus dans leur quota</span></div></div>
+  <div class="stat"><i class="ti ti-alert-triangle red"></i><div><b>{{ n_hors }}</b><span>Bons hors quota ({{ l_hors }} L en trop)</span></div></div>
+  <div class="stat"><i class="ti ti-clock-exclamation amber"></i><div><b>{{ retards }}</b><span>Reçus en retard (plus de 2 jours)</span></div></div>
+</div>
+<div class="cols wide">
+  <section class="card"><div class="card-h"><h2>Consommation sur 6 mois (litres)</h2></div><div class="chartbox"><canvas id="c1"></canvas></div></section>
+  <section class="card"><div class="card-h"><h2>Par carburant</h2></div><div class="chartbox"><canvas id="c2"></canvas></div></section>
+</div>
+<div class="cols">
+  <section class="card"><div class="card-h"><h2>Par site (litres)</h2></div>
+    {% for x in par_site %}<div class="usage"><div class="row"><b>{{ x.nom }}</b><span>{{ x.total }} L</span></div><div class="bar"><i style="width:{{ x.pct }}%"></i></div></div>
+    {% empty %}<p class="empty">Aucun bon validé ce mois-ci.</p>{% endfor %}</section>
+  <section class="card"><div class="card-h"><h2>Bus les plus consommateurs</h2></div>
+    {% for x in top_bus %}<div class="usage"><div class="row"><b>{{ x.bus.plaque }}</b><span>{{ x.litres }} / {{ x.bus.quota_mensuel }} L</span></div><div class="bar"><i class="{% if x.depasse %}over{% endif %}" style="width:{{ x.pct }}%"></i></div></div>
+    {% empty %}<p class="empty">Aucune donnée.</p>{% endfor %}
+  </section>
+</div>
+<div class="cols">
+  <section class="card"><div class="card-h"><h2>Bus en dépassement de quota</h2></div>
+    {% for x in depassants %}<div class="item"><b>{{ x.bus.plaque }}</b><span class="badge manque">{{ x.litres }} / {{ x.bus.quota_mensuel }} L</span></div>{% empty %}<p class="empty">Aucun bus en dépassement.</p>{% endfor %}</section>
+  <section class="card"><div class="card-h"><h2>Chauffeurs : litres du mois</h2></div>
+    {% for x in top_chauf %}<div class="item"><b>{{ x.chauffeur__nom }}</b><span>{{ x.total }} L</span></div>{% empty %}<p class="empty">Aucune donnée.</p>{% endfor %}</section>
+</div>
+{{ graph|json_script:"graph" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+const g = JSON.parse(document.getElementById("graph").textContent);
+const couleurs = ["#4f46e5", "#16a34a", "#f59e0b", "#dc2626", "#0ea5e9", "#8b5cf6", "#64748b"];
+const opt = {maintainAspectRatio: false, plugins: {legend: {display: false}}};
+if (typeof Chart !== "undefined") {
+new Chart(document.getElementById("c1"), {type: "bar", data: {labels: g.evol.labels, datasets: [{data: g.evol.values, backgroundColor: "#4f46e5", borderRadius: 6}]}, options: opt});
+new Chart(document.getElementById("c2"), {type: "doughnut", data: {labels: g.carb.labels, datasets: [{data: g.carb.values, backgroundColor: couleurs}]}, options: {maintainAspectRatio: false}});
+}
+</script>
+{% endblock %}

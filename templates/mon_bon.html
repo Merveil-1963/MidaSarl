@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Bon {{ bon.numero }}{% endblock %}{% block heading %}Bon n° {{ bon.numero }}{% endblock %}
+{% block content %}
+<div class="cols">
+<section class="card">
+  <div class="card-h"><h2>Mon bon</h2>{% include "partials/badge.html" with v=bon.statut l=bon.get_statut_display %}</div>
+  <dl class="dl">
+    <dt>Date</dt><dd>{{ bon.date_bon|date:"d/m/Y" }}</dd>
+    <dt>Plaque</dt><dd>{{ bon.bus.plaque }}</dd>
+    <dt>Carburant</dt><dd>{{ bon.type_carburant }}</dd>
+    <dt>Litres autorisés</dt><dd>{{ bon.litres_autorises }} L</dd>
+  </dl>
+</section>
+<section class="card">
+  <div class="card-h"><h2>Mon reçu</h2></div>
+  {% if bon.recu_fichier %}
+    <div class="preview">
+      {% if bon.recu_est_image %}<img src="{% url 'bon_recu' bon.pk %}" alt="Mon reçu">
+      {% else %}<a class="btn ghost" target="_blank" href="{% url 'bon_recu' bon.pk %}"><i class="ti ti-file-type-pdf"></i>Ouvrir mon reçu (PDF)</a>{% endif %}
+      <div class="note muted">Envoyé le {{ bon.recu_depose_le|date:"d/m/Y à H:i" }}</div>
+    </div>
+  {% endif %}
+  {% if bon.statut == 'valide' or bon.statut == 'servi' %}
+    <form method="post" enctype="multipart/form-data" class="form">{% csrf_token %}
+      <p class="muted">{% if bon.statut == 'servi' %}Votre bon est clôturé. Vous pouvez remplacer le reçu si la photo n'est pas lisible.{% else %}Prenez le reçu de la station en photo (bien lisible) et envoyez-le : votre bon sera clôturé.{% endif %}</p>
+      {% include "partials/fields.html" with form=form %}
+      <button class="btn"><i class="ti ti-upload"></i>{% if bon.statut == 'servi' %}Remplacer le reçu{% else %}Envoyer le reçu{% endif %}</button>
+    </form>
+  {% else %}<p class="muted">Ce bon n'accepte plus de reçu.</p>{% endif %}
+  <div class="actions" style="margin-top:12px"><a class="btn ghost" href="{% url 'mes_bons' %}">Retour à mes bons</a></div>
+</section>
+</div>
+{% endblock %}

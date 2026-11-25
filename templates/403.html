@@ -1,0 +1,5 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accès refusé</title><style>body{font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;background:#f4f6fb;margin:0;text-align:center}
+.c{background:#fff;padding:30px;border-radius:16px;max-width:380px}a{color:#4f46e5}</style></head>
+<body><div class="c"><h1>Accès refusé</h1><p>Votre compte n'a pas de rôle dans l'application (administrateur, DG ou chauffeur). Contactez l'administrateur.</p>
+<form method="post" action="/deconnexion/"><input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"><button>Se déconnecter</button></form></div></body></html>

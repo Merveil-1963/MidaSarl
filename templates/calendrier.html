@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Calendrier{% endblock %}{% block heading %}Calendrier des ravitaillements{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <a class="btn ghost sm" href="?mois={{ prec }}"><i class="ti ti-chevron-left"></i></a>
+  <h2 class="cap">{{ titre|date:"F Y" }}</h2>
+  <a class="btn ghost sm" href="?mois={{ suiv }}"><i class="ti ti-chevron-right"></i></a>
+</div>
+<div class="legend"><span class="badge prevu">Prévu</span><span class="badge emis">Bon émis</span><span class="badge realise">Réalisé</span><span class="badge manque">Manqué</span></div>
+<div class="calwrap"><div class="cal">
+  {% for j in "LMMJVSD" %}<div class="dow">{{ j }}</div>{% endfor %}
+  {% for sem in grille %}{% for c in sem %}
+  <div class="day {% if c.autre %}other{% endif %} {% if c.jour == today %}today{% endif %}">
+    <span class="num">{{ c.jour.day }}</span>
+    {% for p in c.items %}
+      {% if p.statut == 'prevu' or p.statut == 'manque' %}<a class="chip {{ p.statut }}" href="{% url 'bon_nouveau' %}?planning={{ p.pk }}" title="Créer le bon">{{ p.bus.plaque }}</a>
+      {% else %}<a class="chip {{ p.statut }}" href="{% url 'bon_detail' p.bon.pk %}">{{ p.bus.plaque }}</a>{% endif %}
+    {% endfor %}
+  </div>{% endfor %}{% endfor %}
+</div></div>
+{% endblock %}

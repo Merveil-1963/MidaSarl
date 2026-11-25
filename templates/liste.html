@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ c.titre }}{% endblock %}{% block heading %}{{ c.titre }}{% endblock %}
+{% block content %}
+<div class="toolbar"><span class="muted">{{ lignes|length }} enregistrement{{ lignes|length|pluralize }}</span>
+  <a class="btn" href="{% url 'nouveau' cle %}"><i class="ti ti-plus"></i>Ajouter {{ c.un }}</a></div>
+<div class="card tablewrap"><table>
+  <thead><tr>{% for h in colonnes %}<th>{{ h }}</th>{% endfor %}<th></th></tr></thead>
+  {% for l in lignes %}<tr>
+    {% for cell in l.cells %}<td>{% if forloop.first %}<b>{{ cell }}</b>{% else %}{{ cell }}{% endif %}</td>{% endfor %}
+    <td class="end"><a class="btn ghost sm" href="{% url 'modifier' cle l.obj.pk %}">Modifier</a>
+      {% if est_admin %}<form method="post" action="{% url 'supprimer' cle l.obj.pk %}" class="inline" onsubmit="return confirm('Supprimer cet élément ?')">{% csrf_token %}<button class="btn ghost sm danger"><i class="ti ti-trash"></i></button></form>{% endif %}</td>
+  </tr>{% empty %}<tr><td colspan="{{ colonnes|length|add:1 }}" class="empty">Rien pour l'instant.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

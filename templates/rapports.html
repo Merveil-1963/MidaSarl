@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Rapports{% endblock %}{% block heading %}Rapports{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <div class="row-inline"><a class="btn ghost sm" href="?mois={{ prec }}"><i class="ti ti-chevron-left"></i></a><h2 class="cap">{{ titre|date:"F Y" }}</h2><a class="btn ghost sm" href="?mois={{ suiv }}"><i class="ti ti-chevron-right"></i></a></div>
+  <a class="btn" href="?mois={{ mois }}&export=csv"><i class="ti ti-download"></i>Exporter (Excel)</a>
+</div>
+<div class="card tablewrap"><table>
+  <thead><tr><th>Bus</th><th>Site</th><th>Carburant</th><th>Passages</th><th>Litres</th><th>Quota</th><th>Restant</th><th style="width:140px"></th></tr></thead>
+  {% for l in lignes %}<tr><td><b>{{ l.bus.plaque }}</b></td><td>{{ l.bus.site }}</td><td>{{ l.bus.type_carburant }}</td><td>{{ l.passages }}</td><td>{{ l.litres }} L</td><td>{{ l.bus.quota_mensuel }} L</td>
+    <td class="{% if l.restant < 0 %}neg{% endif %}">{{ l.restant }} L</td><td><div class="bar"><i class="{% if l.restant < 0 %}over{% endif %}" style="width:{{ l.pct }}%"></i></div></td></tr>
+  {% empty %}<tr><td colspan="8" class="empty">Aucun bus.</td></tr>{% endfor %}
+</table></div>
+<div class="cols three">
+  <section class="card"><div class="card-h"><h2>Par carburant</h2></div>{% for k, v in par_carb.items %}<div class="item"><b>{{ k }}</b><span>{{ v }} L</span></div>{% empty %}<p class="empty">-</p>{% endfor %}</section>
+  <section class="card"><div class="card-h"><h2>Par site</h2></div>{% for k, v in par_site.items %}<div class="item"><b>{{ k }}</b><span>{{ v }} L</span></div>{% empty %}<p class="empty">-</p>{% endfor %}</section>
+  <section class="card"><div class="card-h"><h2>Par chauffeur</h2></div>{% for k, v in par_chauf.items %}<div class="item"><b>{{ k }}</b><span>{{ v }} L</span></div>{% empty %}<p class="empty">-</p>{% endfor %}</section>
+</div>
+<section class="card"><div class="card-h"><h2>Bons hors quota</h2></div>
+  {% for b in hors %}<a class="item link" href="{% url 'bon_detail' b.pk %}"><div><b>Bon n° {{ b.numero }} · {{ b.bus.plaque }}</b><small>{{ b.motif_depassement }}</small></div><span class="badge manque">+{{ b.depassement_litres }} L</span></a>
+  {% empty %}<p class="empty">Aucun dépassement ce mois.</p>{% endfor %}
+</section>
+{% endblock %}

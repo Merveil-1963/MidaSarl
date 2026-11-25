@@ -1,0 +1,82 @@
+{% load static %}<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Bon {{ bon.numero }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 700px; margin: 30px auto; color: #000; }
+        .entete { text-align: left; border-bottom: 2px solid #183d73; padding-bottom: 8px; margin-bottom: 18px; }
+        .entete img { display: block; width: 220px; max-height: 120px; object-fit: contain; }
+        .organisation { margin-top: 3px; color: #183d73; font-size: 10px; font-weight: bold; line-height: 1.15; }
+        .ligne-date { text-align: right; font-size: 14px; margin: 12px 0 8px; }
+        .titre-bon { display: flex; align-items: center; margin: 8px 0 12px; }
+        .titre-bon h1 { flex: 1; font-size: 20px; text-align: center; margin: 0; }
+        .n { color: #c00; font-size: 22px; font-weight: bold; min-width: 145px; text-align: right; }
+        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+        th, td { border: 1px solid #000; padding: 10px 12px; font-size: 12px; }
+        th { height: 45px; text-align: center; font-weight: bold; }
+        td { height: 42px; vertical-align: middle; }
+        .col-informations { width: 42%; font-weight: bold; }
+        .col-details { width: 58%; text-align: left; }
+        .label-ligne { height: 75px; vertical-align: middle; text-align: left; font-weight: bold; }
+        .champ-bon { font-weight: bold; display: block; margin-bottom: 14px; }
+        .details-cell { height: 150px; text-align: left; vertical-align: top; }
+        .v { display: flex; justify-content: space-between; margin-top: 55px; font-size: 14px; }
+        @page { size: A4 portrait; margin: 12mm; }
+        @media print { body { margin: 0; } button { display: none; } }
+    </style>
+</head>
+<body onload="window.print()">
+    <header class="entete">
+        <img src="{% static 'images/logo.jpg' %}" alt="Logo MIDA SARL">
+        <div class="organisation">
+            VILLE DE KOLWEZI<br>
+            QUARTIER JOLIE SITE, ROUTE LIKASI N°5598<br>
+            NIF : A2032947K<br>
+            ID.NAT : 14-H6300-N75970P<br>
+            N° RCCM : CD/KZI/RCCM/19-B-1150
+        </div>
+    </header>
+
+    <div class="ligne-date">Kolwezi, le {{ bon.date_bon|date:"d/m/Y" }}</div>
+    <div class="titre-bon">
+        <h1>BON DE RAVITAILLEMENT CARBURANT</h1>
+        <span class="n">N° {{ bon.numero }}</span>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="col-informations">Informations</th>
+                <th class="col-details">Détails</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+            </tr>
+            <tr>
+                <td class="col-informations">Nom du chauffeur</td>
+                <td class="col-details">{{ bon.chauffeur.nom }}</td>
+            </tr>
+            <tr>
+                <td class="col-informations">Plaque d'immatriculation du véhicule</td>
+                <td class="col-details">{{ bon.bus.plaque }}</td>
+            </tr>
+            <tr>
+                <td class="col-informations">Nature de carburant</td>
+                <td class="col-details">{{ bon.type_carburant }}</td>
+            </tr>
+            <tr>
+                <td class="col-informations">Quantité en litre</td>
+                <td class="col-details">{{ bon.litres_autorises }} litres</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="v">
+        <span>Visa chauffeur</span>
+        <span>Visa administration</span>
+        <span>Visa DG</span>
+    </div>
+</body>
+</html>

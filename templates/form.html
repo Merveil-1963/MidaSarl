@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}{{ c.titre }}{% endblock %}{% block heading %}{% if obj %}Modifier{% else %}Ajouter{% endif %} {{ c.un }}{% endblock %}
+{% block content %}
+<form method="post" class="card form">{% csrf_token %}
+  {% include "partials/fields.html" %}
+  <div class="actions"><button class="btn">Enregistrer</button><a class="btn ghost" href="{% url 'liste' cle %}">Annuler</a></div>
+</form>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Bons{% endblock %}{% block heading %}Bons de ravitaillement{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <form class="filters" method="get">
+    <input name="q" value="{{ q }}" placeholder="Plaque ou chauffeur">
+    <select name="statut" onchange="this.form.submit()">
+      <option value="">Tous les statuts</option>
+      {% for v, l in statuts %}<option value="{{ v }}" {% if v == statut %}selected{% endif %}>{{ l }}</option>{% endfor %}
+      <option value="hors_quota" {% if statut == 'hors_quota' %}selected{% endif %}>Hors quota</option>
+    </select>
+    <button class="btn ghost">Filtrer</button>
+  </form>
+  <a class="btn" href="{% url 'bon_nouveau' %}"><i class="ti ti-plus"></i>Nouveau bon</a>
+</div>
+<div class="card tablewrap"><table>
+  <thead><tr><th>N°</th><th>Date</th><th>Bus</th><th>Chauffeur</th><th>Litres</th><th>Statut</th></tr></thead>
+  {% for b in bons %}
+  <tr onclick="location='{% url 'bon_detail' b.pk %}'" class="clickable">
+    <td><b>{{ b.numero }}</b>{% if b.recu_fichier %} <i class="ti ti-paperclip" title="Reçu déposé"></i>{% endif %}</td><td>{{ b.date_bon|date:"d/m/Y" }}</td><td>{{ b.bus.plaque }}</td><td>{{ b.chauffeur }}</td>
+    <td>{{ b.litres_autorises }} L</td>
+    <td>{% include "partials/badge.html" with v=b.statut l=b.get_statut_display %}{% if b.hors_quota %} <span class="badge manque">Hors quota</span>{% endif %}</td>
+  </tr>
+  {% empty %}<tr><td colspan="6" class="empty">Aucun bon.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

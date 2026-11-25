@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Nouveau bon{% endblock %}{% block heading %}Nouveau bon de ravitaillement{% endblock %}
+{% block content %}
+<form method="post" class="card form">{% csrf_token %}
+  {% include "partials/fields.html" %}
+  <div class="alert" id="info" hidden></div>
+  <div class="actions"><button class="btn" name="valider" value="1">Créer et valider</button><button class="btn ghost">Créer en brouillon</button><a class="btn ghost" href="{% url 'bons' %}">Annuler</a></div>
+</form>
+<script>
+const $ = n => document.getElementById("id_" + n), info = document.getElementById("info");
+let precedent = $("bus").value;
+async function maj() {
+  if (!$("bus").value || !$("date_bon").value) { info.hidden = true; return; }
+  const r = await fetch(`{% url 'api_quota' %}?bus=${$("bus").value}&date=${$("date_bon").value}&litres=${$("litres_autorises").value || 0}`);
+  if (!r.ok) return;
+  const d = await r.json();
+  info.hidden = false;
+  info.className = "alert" + (d.depassement ? " warn" : "");
+  info.textContent = d.depassement
+    ? `Dépassement de ${d.depassement} L (déjà ${d.cumul} L sur ${d.quota} L ce mois). Un motif est obligatoire.`
+    : `Déjà ${d.cumul} L ce mois sur ${d.quota} L. Quota restant : ${d.restant} L.`;
+  if ($("bus").value !== precedent) { $("litres_autorises").value = d.litres_standard; precedent = $("bus").value; maj(); }
+}
+["bus", "date_bon", "litres_autorises"].forEach(n => $(n).addEventListener("input", maj));
+maj();
+</script>
+{% endblock %}
