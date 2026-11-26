@@ -12,7 +12,7 @@ class Site(models.Model):
     nom = models.CharField("Nom", max_length=100, unique=True)
 
     class Meta:
-        ordering = ["nom"]``
+        ordering = ["nom"]
 
     def __str__(self):
         return self.nom
