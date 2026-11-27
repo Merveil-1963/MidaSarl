@@ -22,7 +22,7 @@
   {% endif %}
   {% if bon.statut == 'valide' or bon.statut == 'servi' %}
     <form method="post" enctype="multipart/form-data" class="form">{% csrf_token %}
-      <p class="muted">{% if bon.statut == 'servi' %}Votre bon est clôturé. Vous pouvez remplacer le reçu si la photo n'est pas lisible.{% else %}Prenez le reçu de la station en photo (bien lisible) et envoyez-le : votre bon sera clôturé.{% endif %}</p>
+      <p class="muted">{% if bon.statut == 'servi' %}Votre bon est clôturé. Vous pouvez remplacer le reçu avec une nouvelle photo.{% else %}Prenez directement une photo du reçu avec votre appareil photo, ou choisissez une photo existante.{% endif %}</p>
       {% include "partials/fields.html" with form=form %}
       <button class="btn"><i class="ti ti-upload"></i>{% if bon.statut == 'servi' %}Remplacer le reçu{% else %}Envoyer le reçu{% endif %}</button>
     </form>

@@ -1,11 +1,12 @@
 {% load static %}<!DOCTYPE html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Connexion · Carburant bus</title>
+<link rel="icon" type="image/jpeg" href="{% static 'images/logo.jpg' %}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link rel="stylesheet" href="{% static 'css/app.css' %}"></head>
 <body class="login-page">
 <form method="post" class="login-card">{% csrf_token %}
-  <div class="brand dark"><i class="ti ti-gas-station"></i><span>Carburant bus</span></div>
+  <div class="brand dark"><img src="{% static 'images/logo.jpg' %}" alt="MIDA SARL"><span>Carburant bus</span></div>
   <p class="muted">Connectez-vous pour gérer les ravitaillements.</p>
   {% if form.errors %}<div class="msg error">Identifiant ou mot de passe incorrect.</div>{% endif %}
   <div class="field"><label>Identifiant</label>{{ form.username }}</div>

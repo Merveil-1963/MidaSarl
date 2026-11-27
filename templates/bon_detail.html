@@ -25,10 +25,11 @@
 </section>
 <section class="card">
   <div class="card-h"><h2>Actions</h2></div>
-  {% if bon.statut == 'brouillon' %}
+  {% if bon.statut == 'approuve' %}
     <form method="post" class="actions">{% csrf_token %}
-      <button class="btn" name="action" value="valider"><i class="ti ti-check"></i>Valider</button>
-      <button class="btn danger" name="action" value="refuser">Refuser</button></form>
+      <button class="btn" name="action" value="valider"><i class="ti ti-check"></i>Approuver</button>
+      <button class="btn danger" name="action" value="refuser">Refuser</button>
+    </form>
   {% elif bon.statut == 'valide' or bon.statut == 'servi' %}
     <p class="muted">{% if bon.statut == 'valide' %}Le bon est clôturé dès que le chauffeur dépose son reçu.{% else %}Bon clôturé par le reçu du chauffeur.{% endif %}</p>
     <form method="post" enctype="multipart/form-data" class="form">{% csrf_token %}<input type="hidden" name="action" value="recu">
@@ -38,7 +39,7 @@
   {% else %}<p class="muted">Aucune action à faire.</p>{% endif %}
   <div class="actions" style="margin-top:12px">
     {% if bon.statut == 'valide' or bon.statut == 'servi' %}<a class="btn ghost" target="_blank" href="{% url 'bon_imprimer' bon.pk %}"><i class="ti ti-printer"></i>Imprimer</a>{% endif %}
-    {% if bon.statut == 'brouillon' or bon.statut == 'valide' %}<form method="post" class="inline" onsubmit="return confirm('Annuler ce bon ?')">{% csrf_token %}<button class="btn ghost danger" name="action" value="annuler">Annuler le bon</button></form>{% endif %}
+    {% if bon.statut == 'valide' or bon.statut == 'approuve' %}<form method="post" class="inline" onsubmit="return confirm('Annuler ce bon ?')">{% csrf_token %}<button class="btn ghost danger" name="action" value="annuler">Annuler le bon</button></form>{% endif %}
     <a class="btn ghost" href="{% url 'bons' %}">Retour</a>
   </div>
 </section>

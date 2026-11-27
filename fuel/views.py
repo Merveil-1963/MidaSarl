@@ -81,7 +81,7 @@ def dashboard(request):
         "manques": manques.select_related("bus")[:8],
         "n_manques": manques.count(),
         "n_a_ravitailler": Plan.objects.filter(date_prevue=t, statut="prevu").count(),
-        "n_a_valider": Bon.objects.filter(statut="brouillon").count(),
+        "n_a_valider": Bon.objects.filter(statut="approuve").count(),
         "n_hors_quota": bons_mois.filter(hors_quota=True).count(),
         "litres_mois": bons_mois.aggregate(t=Sum(LITRES))["t"] or 0,
         "usage": usage[:8],
@@ -166,14 +166,14 @@ def bon_detail(request, pk):
     upload_form = RecuUploadForm()
     if request.method == "POST":
         action = request.POST.get("action")
-        if action in ("valider", "refuser") and bon.statut == "brouillon":
+        if action in ("valider", "refuser") and bon.statut == "approuve":
             bon.statut = "valide" if action == "valider" else "refuse"
             bon.valide_par, bon.date_validation = request.user, timezone.now()
             bon.save()
             if action == "refuser":
                 _libere_planning(bon)
             messages.success(request, "Bon validé." if action == "valider" else "Bon refusé.")
-        elif action == "annuler" and bon.statut in ("brouillon", "valide"):
+        elif action == "annuler" and bon.statut in ("approuve", "valide"):
             bon.statut = "annule"
             bon.save()
             _libere_planning(bon)
@@ -352,7 +352,8 @@ def kpi(request):
     hors = mois.filter(hors_quota=True)
     graph = {"evol": evol,
              "carb": {"labels": [x["type_carburant"] for x in carb], "values": [x["total"] for x in carb]},
-             "site": {"labels": [x["bus__site__nom"] for x in site], "values": [x["total"] for x in site]}}
+             "site": {"labels": [x["bus__site__nom"] for x in site], "values": [x["total"] for x in site]},
+             "top_bus": {"labels": [x["bus"].plaque for x in par_bus[:6]], "values": [x["litres"] for x in par_bus[:6]]}}
     return render(request, "kpi.html", {
         "titre": date(a, m, 1), "prec": prec, "suiv": suiv, "mois": f"{a}-{m:02d}",
         "litres_mois": litres_mois, "variation": variation, "n_bons": mois.count(),
@@ -360,7 +361,7 @@ def kpi(request):
         "taux_quota": round(sous_quota * 100 / len(par_bus)) if par_bus else None,
         "n_hors": hors.count(), "l_hors": hors.aggregate(t=Sum("depassement_litres"))["t"] or 0,
         "retards": Bon.objects.filter(statut="valide", date_bon__lt=t - timedelta(days=2)).count(),
-        "n_a_valider": Bon.objects.filter(statut="brouillon").count(),
+        "n_a_valider": Bon.objects.filter(statut="approuve").count(),
         "par_site": par_site, "top_bus": par_bus[:6], "depassants": depassants, "top_chauf": chauf, "graph": graph})
 
 
@@ -375,7 +376,7 @@ def _chauffeur(request):
 @roles_requis("chauffeur")
 def mes_bons(request):
     ch = _chauffeur(request)
-    qs = Bon.objects.filter(chauffeur=ch).exclude(statut="brouillon").select_related("bus")
+    qs = Bon.objects.filter(chauffeur=ch).exclude(statut="approuve").select_related("bus")
     return render(request, "mes_bons.html", {
         "ch": ch, "a_deposer": qs.filter(statut="valide"), "autres": qs.exclude(statut="valide")[:30]})
 
@@ -384,14 +385,21 @@ def mes_bons(request):
 def mon_bon(request, pk):
     ch = _chauffeur(request)
     bon = get_object_or_404(Bon.objects.select_related("bus"), pk=pk, chauffeur=ch)
-    if bon.statut == "brouillon":
+    if bon.statut == "approuve":
         raise Http404
     form = RecuUploadForm()
+    form.fields["fichier"].label = "Prendre une photo du reçu"
+    form.fields["fichier"].widget.attrs.update({
+        "accept": "image/*",
+        "capture": "environment",
+    })
     if request.method == "POST":
         if bon.statut not in ("valide", "servi"):
             messages.error(request, "Ce bon n'accepte plus de reçu.")
         else:
             form = RecuUploadForm(request.POST, request.FILES)
+            form.fields["fichier"].label = "Prendre une photo du reçu"
+            form.fields["fichier"].widget.attrs.update({"accept": "image/*", "capture": "environment"})
             if form.is_valid():
                 _enregistre_recu(bon, form.cleaned_data["fichier"])
                 messages.success(request, "Reçu envoyé. Votre bon est clôturé.")

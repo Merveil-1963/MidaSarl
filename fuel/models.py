@@ -79,8 +79,8 @@ class PlanningAppro(models.Model):
 
 class BonRavitaillement(models.Model):
     class Statut(models.TextChoices):
-        BROUILLON = "brouillon", "Brouillon"
-        VALIDE = "valide", "Validé"
+        APPROUVE = "non approuve", "Non Approuvé"
+        VALIDE = "approuve", "Approuvé"
         SERVI = "servi", "Servi (reçu déposé)"
         ANNULE = "annule", "Annulé"
         REFUSE = "refuse", "Refusé"
@@ -97,7 +97,7 @@ class BonRavitaillement(models.Model):
     hors_quota = models.BooleanField("Hors quota", default=False)
     depassement_litres = models.PositiveIntegerField("Dépassement (L)", default=0)
     motif_depassement = models.TextField("Motif du dépassement", blank=True)
-    statut = models.CharField(max_length=10, choices=Statut.choices, default=Statut.BROUILLON)
+    statut = models.CharField(max_length=12, choices=Statut.choices, default=Statut.APPROUVE)
     cree_par = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="bons_crees")
     valide_par = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="bons_valides")
     date_validation = models.DateTimeField(null=True, blank=True)

@@ -4,7 +4,7 @@
 <form method="post" class="card form">{% csrf_token %}
   {% include "partials/fields.html" %}
   <div class="alert" id="info" hidden></div>
-  <div class="actions"><button class="btn" name="valider" value="1">Créer et valider</button><button class="btn ghost">Créer en brouillon</button><a class="btn ghost" href="{% url 'bons' %}">Annuler</a></div>
+  <div class="actions"><button class="btn" name="valider" value="1">Créer et valider</button><button class="btn ghost">Créer en approuvé</button><a class="btn ghost" href="{% url 'bons' %}">Annuler</a></div>
 </form>
 <script>
 const $ = n => document.getElementById("id_" + n), info = document.getElementById("info");

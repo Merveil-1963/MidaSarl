@@ -1,10 +1,29 @@
 {% extends "base.html" %}
 {% block title %}Calendrier{% endblock %}{% block heading %}Calendrier des ravitaillements{% endblock %}
 {% block content %}
+<style>
+  .calendar-toolbar-actions { display: flex; align-items: center; gap: 8px; }
+  @media print {
+    @page { size: A4 landscape; margin: 0; }
+    .sidebar, .topbar, .overlay, .toolbar { display: none !important; }
+    .main { margin-left: 0 !important; }
+    .content { padding: 0 !important; max-width: none !important; }
+    .print-heading { display: block !important; text-align: center; margin: 0 0 10px; }
+    .calwrap { overflow: visible !important; }
+    .cal { grid-template-columns: repeat(7, 1fr) !important; gap: 4px; }
+    .day { min-height: 105px; break-inside: avoid; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .chip { text-decoration: none; }
+  }
+  .print-heading { display: none; }
+</style>
+<h2 class="print-heading">Calendrier des ravitaillements - {{ titre|date:"F Y" }}</h2>
 <div class="toolbar">
-  <a class="btn ghost sm" href="?mois={{ prec }}"><i class="ti ti-chevron-left"></i></a>
-  <h2 class="cap">{{ titre|date:"F Y" }}</h2>
-  <a class="btn ghost sm" href="?mois={{ suiv }}"><i class="ti ti-chevron-right"></i></a>
+  <div class="row-inline">
+    <a class="btn ghost sm" href="?mois={{ prec }}"><i class="ti ti-chevron-left"></i></a>
+    <h2 class="cap">{{ titre|date:"F Y" }}</h2>
+    <a class="btn ghost sm" href="?mois={{ suiv }}"><i class="ti ti-chevron-right"></i></a>
+  </div>
+  <button class="btn sm" type="button" onclick="window.print()"><i class="ti ti-printer"></i>Imprimer</button>
 </div>
 <div class="legend"><span class="badge prevu">Prévu</span><span class="badge emis">Bon émis</span><span class="badge realise">Réalisé</span><span class="badge manque">Manqué</span></div>
 <div class="calwrap"><div class="cal">

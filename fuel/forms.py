@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 from .models import BonRavitaillement, Bus, Chauffeur, PlanningAppro, Site
 from .services import cumul_mois
@@ -21,6 +22,8 @@ class ChauffeurForm(forms.ModelForm):
                                   help_text="Laissez vide si ce chauffeur n'a pas de compte.")
     mot_de_passe = forms.CharField(label="Mot de passe", required=False, widget=forms.PasswordInput(render_value=False),
                                    help_text="Obligatoire à la création du compte. Laissez vide pour ne pas le changer.")
+    confirmation_mot_de_passe = forms.CharField(label="Confirmer le mot de passe", required=False,
+                                                widget=forms.PasswordInput(render_value=False))
 
     class Meta:
         model = Chauffeur
@@ -38,32 +41,42 @@ class ChauffeurForm(forms.ModelForm):
             if self.instance.user_id:
                 qs = qs.exclude(pk=self.instance.user_id)
             if qs.exists():
-                raise forms.ValidationError("Cet identifiant existe déjà.")
+                raise ValidationError("Cet identifiant existe déjà.")
         return v
 
     def clean(self):
         d = super().clean()
-        ident, pw = d.get("identifiant"), d.get("mot_de_passe")
+        ident = d.get("identifiant")
+        pw = d.get("mot_de_passe")
+        confirmation = d.get("confirmation_mot_de_passe")
+
         if ident and not self.instance.user_id and not pw:
             self.add_error("mot_de_passe", "Mot de passe obligatoire pour créer le compte.")
-        if pw and len(pw) < 6:
-            self.add_error("mot_de_passe", "6 caractères minimum.")
+        if pw:
+            if len(pw) < 6:
+                self.add_error("mot_de_passe", "6 caractères minimum.")
+            if pw != confirmation:
+                self.add_error("confirmation_mot_de_passe", "Les mots de passe ne correspondent pas.")
+            else:
+                user = self.instance.user if self.instance.user_id else User(username=ident or "chauffeur")
+                try:
+                    validate_password(pw, user)
+                except ValidationError as exc:
+                    self.add_error("mot_de_passe", exc)
+        elif confirmation:
+            self.add_error("mot_de_passe", "Entrez le mot de passe, puis confirmez-le.")
         return d
 
     def save(self, commit=True):
-        ch = super().save(commit=True)
+        ch = super().save(commit=commit)
         ident, pw = self.cleaned_data.get("identifiant"), self.cleaned_data.get("mot_de_passe")
         if ident:
-            u = ch.user if ch.user_id else User()
+            u = ch.user if ch.user_id else User(username=ident)
             u.username = ident
             u.first_name = ch.nom[:150]
             u.is_active = ch.actif
             if pw:
-                user = self.instance.user if self.instance.user_id else User(username=ident or "chauffeur")
-                try:
-                    validate_password(pw, user)
-                except forms.ValidationError as exc:
-                    self.add_error("mot_de_passe", exc)
+                u.set_password(pw)
             u.save()
             u.groups.add(Group.objects.get_or_create(name="Chauffeur")[0])
             if not ch.user_id:

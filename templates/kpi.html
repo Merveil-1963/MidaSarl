@@ -16,11 +16,9 @@
 </div>
 <div class="cols">
   <section class="card"><div class="card-h"><h2>Par site (litres)</h2></div>
-    {% for x in par_site %}<div class="usage"><div class="row"><b>{{ x.nom }}</b><span>{{ x.total }} L</span></div><div class="bar"><i style="width:{{ x.pct }}%"></i></div></div>
-    {% empty %}<p class="empty">Aucun bon validé ce mois-ci.</p>{% endfor %}</section>
+    <div class="chartbox"><canvas id="c3"></canvas></div></section>
   <section class="card"><div class="card-h"><h2>Bus les plus consommateurs</h2></div>
-    {% for x in top_bus %}<div class="usage"><div class="row"><b>{{ x.bus.plaque }}</b><span>{{ x.litres }} / {{ x.bus.quota_mensuel }} L</span></div><div class="bar"><i class="{% if x.depasse %}over{% endif %}" style="width:{{ x.pct }}%"></i></div></div>
-    {% empty %}<p class="empty">Aucune donnée.</p>{% endfor %}
+    <div class="chartbox"><canvas id="c4"></canvas></div>
   </section>
 </div>
 <div class="cols">
@@ -38,6 +36,8 @@ const opt = {maintainAspectRatio: false, plugins: {legend: {display: false}}};
 if (typeof Chart !== "undefined") {
 new Chart(document.getElementById("c1"), {type: "bar", data: {labels: g.evol.labels, datasets: [{data: g.evol.values, backgroundColor: "#4f46e5", borderRadius: 6}]}, options: opt});
 new Chart(document.getElementById("c2"), {type: "doughnut", data: {labels: g.carb.labels, datasets: [{data: g.carb.values, backgroundColor: couleurs}]}, options: {maintainAspectRatio: false}});
+new Chart(document.getElementById("c3"), {type: "bar", data: {labels: g.site.labels, datasets: [{data: g.site.values, backgroundColor: "#16a34a", borderRadius: 6}]}, options: opt});
+new Chart(document.getElementById("c4"), {type: "bar", data: {labels: g.top_bus.labels, datasets: [{data: g.top_bus.values, backgroundColor: "#f59e0b", borderRadius: 6}]}, options: opt});
 }
 </script>
 {% endblock %}
